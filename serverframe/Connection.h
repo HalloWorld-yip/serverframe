@@ -23,21 +23,21 @@ public:
 
 	SOCKET socket() { return m_IOSocket; }
 
-	void setReadCallback(const IOCallback& cb) { m_readCallback = cb; }
-	void setWriteCallback(const IOCallback& cb) { m_writeCallback = cb; }
-	void setCloseCallback(const IOCallback& cb) { m_closeCallback = cb; }
-	void setErrorCallback(const IOCallback& cb) { m_errorCallback = cb; }
+	void setReadCallback(const EventCallback& cb) { m_pIOChannel->setReadCallback(cb); }
+	void setWriteCallback(const EventCallback& cb) { m_pIOChannel->setWriteCallback(cb); }
+	void setCloseCallback(const EventCallback& cb) { m_pIOChannel->setCloseCallback(cb); }
+	void setErrorCallback(const EventCallback& cb) { m_pIOChannel->setErrorCallback(cb); }
+
+
+	void setPostRecv(const EventCallback& cb) { m_postRecv = cb; }
+	void setPostSend(const EventCallback& cb) { m_postSend = cb; }
+
+	
+
 private:
-	void readHandler() { m_readCallback(this); }//fix 
-	void writeHandler() { m_writeCallback(this); }
-	void closeHandler() { m_closeCallback(this); }
-	void errHandler() { m_errorCallback(this); }
 
-
-	IOCallback m_readCallback;
-	IOCallback m_writeCallback;
-	IOCallback m_closeCallback;
-	IOCallback m_errorCallback;
+	EventCallback m_postSend;
+	EventCallback m_postRecv;
 
 	OVERLAPPEDPLUS m_readOverlapped;
 	OVERLAPPEDPLUS m_writeOverlapped;

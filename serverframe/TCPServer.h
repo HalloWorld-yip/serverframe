@@ -7,14 +7,7 @@
 #include"Connection.h"
 #include"Acceptor.h"
 #include"LockMap.h"
-class Asocket
-{
-public:
-	Asocket() { s_.bind(); s_.listen(); }
-	SOCKET socket() { return s_.socket(); }
-private:
-	Socket s_;
-};
+
 
 
 /*
@@ -24,26 +17,29 @@ private:
 class TCPServer
 {
 public:
-	typedef std::function<void()> EventCallback;
+	typedef std::function<void(overlappedplus*)> EventCallback;
 	//typedef std::function<void(std::shared_ptr<Connection>)> IOCallback;
 	typedef std::function<void(Connection*)> IOCallback;
-	//typedef std::vector<std::shared_ptr<Connection> > ConnectionsList;
+
 	typedef std::map<SOCKET, std::shared_ptr<Connection> > ConnectionsList;
-	////debug:
-	//typedef std::map<SOCKET, Connection* > ConnectionsList;
+
 
 	TCPServer(Loop &loop);
 	~TCPServer() { WSACleanup(); }
 	void start();
 
-	void setReadCallback(const IOCallback& cb) { m_acceptor.setReadCallback(cb); }
-	void setWriteCallback(const IOCallback& cb) { m_acceptor.setWriteCallback(cb); }
-	void setCloseCallback(const IOCallback& cb) { m_acceptor.setCloseCallback(cb); }
-	void setErrorCallback(const IOCallback& cb) { m_acceptor.setErrorCallback(cb); }
+
+	void setReadCallback(const IOCallback& cb) { m_readCallback = cb; }
+	void setWriteCallback(const IOCallback& cb) { m_writeCallback = cb; }
+	void setCloseCallback(const IOCallback& cb) { m_closeCallback = cb; }
+	void setErrorCallback(const IOCallback& cb) { m_errorCallback = cb; }
 	
 private:
 
-	void removeConnection();
+	void postAccept(overlappedplus* pOverlapped);
+
+	void newConnection(overlappedplus* pOverlapped);
+	void removeConnection(Connection * conn);
 
 
 
@@ -58,10 +54,17 @@ private:
 
 	std::map<int, std::shared_ptr<Channel> > m_ChannelMap;
 */
-	Loop&	m_loop;
-	Asocket	m_accetpSocket;
+
+	EventCallback m_acceptCallback;
+	IOCallback m_readCallback;
+	IOCallback m_writeCallback;
+	IOCallback m_closeCallback;
+	IOCallback m_errorCallback;
+
+	Lock		lock;
+	Loop&		m_loop;
+	Acceptor	m_acceptor;
+
 	ConnectionsList m_connections;
 
-
-	Acceptor m_acceptor;
 };
