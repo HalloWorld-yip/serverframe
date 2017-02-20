@@ -5,7 +5,7 @@
 #include<memory>
 #include"Thread.h"
 #include"Channel.h"
-#include<map>
+#include<vector>
 
 
 
@@ -14,7 +14,7 @@ class Loop
 public:
 	typedef std::function<void()> exeCallback;
 	Loop();
-	void start();
+	void Start();
 	void stop() { m_running = false; }
 	void loopping();
 

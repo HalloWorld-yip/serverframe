@@ -11,8 +11,9 @@
 
 
 /*
-	数据和操作分离，多线程下，管理操作的类绑定在其函数上，其拥有的需要被访问的数据应尽量减少
+	
 	数据全部储存在投递到端口上的Channel中，取出时对其进行操作。
+	Server在建立连接时留给用户一个启动服务的接口，对于READ,WRITE，CLOSE，ERR等回调需要用户自己设置
 */
 class TCPServer
 {
@@ -26,45 +27,26 @@ public:
 
 	TCPServer(Loop &loop);
 	~TCPServer() { WSACleanup(); }
-	void start();
+	void Start();
 
-
-	void setReadCallback(const IOCallback& cb) { m_readCallback = cb; }
-	void setWriteCallback(const IOCallback& cb) { m_writeCallback = cb; }
-	void setCloseCallback(const IOCallback& cb) { m_closeCallback = cb; }
-	void setErrorCallback(const IOCallback& cb) { m_errorCallback = cb; }
-	
+	void Serve(IOCallback &cb) { m_serveCallback = cb; }
 private:
 
 	void postAccept(overlappedplus* pOverlapped);
-
 	void newConnection(overlappedplus* pOverlapped);
 	void removeConnection(Connection * conn);
 
 
-
-	/*
-	addChannel单纯地将管理句柄的Channel加入Map记录
-	需要预先投递事件。
-	*/
-	/*
-	将channel的管理分发到connect中，channelMap似乎不太必要
-	void  addChannel(std::shared_ptr<Channel> channel);
-	void  deleteChannel(std::shared_ptr<Channel> channel);
-
-	std::map<int, std::shared_ptr<Channel> > m_ChannelMap;
-*/
-
 	EventCallback m_acceptCallback;
-	IOCallback m_readCallback;
-	IOCallback m_writeCallback;
-	IOCallback m_closeCallback;
-	IOCallback m_errorCallback;
+	IOCallback m_serveCallback;
 
+	/*
+	用于管理连接相关数据的生命期
+	*/
+	ConnectionsList m_connections;
 	Lock		lock;
 	Loop&		m_loop;
 	Acceptor	m_acceptor;
 
-	ConnectionsList m_connections;
 
 };

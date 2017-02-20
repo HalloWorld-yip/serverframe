@@ -11,7 +11,7 @@ TCPServer::TCPServer(Loop &loop)
 
 }
 
-void TCPServer::start() 
+void TCPServer::Start() 
 {
 	POVERLAPPEDPLUS	m_pOverlap(new OVERLAPPEDPLUS);
 	m_pOverlap->event_ = Channel::Event::ACCEPT;
@@ -27,6 +27,7 @@ void TCPServer::postAccept(overlappedplus* pOverlapped)
 {
 	TRACE << "post accept event";
 	SOCKET newSocket;
+
 	{
 		LockGuard guard(lock);
 		newSocket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
@@ -35,6 +36,7 @@ void TCPServer::postAccept(overlappedplus* pOverlapped)
 		WRONG << "socket has not free!";
 		}*/
 	}
+
 	if (newSocket == SOCKET_ERROR)
 	{
 		WRONG << "socket failed:" << WSAGetLastError();
@@ -68,17 +70,13 @@ void TCPServer::postAccept(overlappedplus* pOverlapped)
 
 void TCPServer::newConnection(overlappedplus * pOverlapped)
 {
-	
-
 		TRACE << "acceptHandle";
 
 		CreateIoCompletionPort((HANDLE)pOverlapped->pChannel->getSocket(), m_loop.IOCPport(), (ULONG_PTR)pOverlapped->pChannel, 0);
-		Connection* pConn = new Connection(pOverlapped->pChannel);
-		pConn->setWriteCallback(std::bind(m_writeCallback, pConn));
-		pConn->setReadCallback(std::bind(m_readCallback, pConn));
-		pConn->setCloseCallback(std::bind(&TCPServer::removeConnection, this, pConn));
-		pConn->setErrorCallback(std::bind(m_errorCallback, pConn));
-		pConn->setPostRecv(std::bind(m_readCallback, pConn));
+		IOCallback funtor(std::bind(&TCPServer::removeConnection, this, std::placeholders::_1));
+		Connection* pConn = new Connection(pOverlapped->pChannel, funtor);
+
+		m_serveCallback(pConn);
 
 		{
 			LockGuard guard(lock);
@@ -88,8 +86,6 @@ void TCPServer::newConnection(overlappedplus * pOverlapped)
 				WRONG << "map insert failed!!!!";
 			}
 		}
-		//postIO
-		pConn->postRecv();
 
 
 		//repost
@@ -106,10 +102,11 @@ void TCPServer::removeConnection(Connection * conn)
 		if ((err = GetLastError()) != ERROR_NOT_FOUND)
 			WRONG << "CancelIO failed:" << err;
 	}
-
-	LockGuard guard(lock);
-	closesocket(conn->socket());
-	m_connections.erase(conn->socket());
+	{
+		LockGuard guard(lock);
+		closesocket(conn->socket());
+		m_connections.erase(conn->socket());
+	}
 }
 
 

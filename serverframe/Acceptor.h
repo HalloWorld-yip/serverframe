@@ -21,7 +21,7 @@ public:
 
 	void setAcceptCallback(const EventCallback& cb) { m_pAcceptChannel->setAcceptCallback(cb); }
 
-	bool AcceptEx(SOCKET s, LPOVERLAPPED lpOverlapped);
+	BOOL AcceptEx(SOCKET s, LPOVERLAPPED lpOverlapped);
 private:
 	void getAcceptFunc();
 

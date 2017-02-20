@@ -22,7 +22,7 @@ Acceptor::Acceptor(HANDLE port, EventCallback& cb)
 
 
 
-bool Acceptor::AcceptEx(SOCKET s, LPOVERLAPPED lpOverlapped)
+BOOL Acceptor::AcceptEx(SOCKET s, LPOVERLAPPED lpOverlapped)
 {
 
 	DWORD dwBytes = 0;

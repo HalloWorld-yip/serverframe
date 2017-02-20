@@ -32,6 +32,16 @@ void closecallback(Connection* pConnection)
 }
 void defaultcallback(Connection* pConnection){}
 
+void Scallback(Connection* pConn)
+{
+	pConn->setWriteCallback(std::bind(defaultcallback, pConn));
+	pConn->setReadCallback(std::bind(readcallback, pConn));
+	pConn->setCloseCallback(std::bind(closecallback, pConn));
+	pConn->setErrorCallback(std::bind(defaultcallback, pConn));
+	//postIO
+	readcallback(pConn);
+}
+
 void loopthread(Loop* loop)
 {
 	loop->loopping();
@@ -40,13 +50,10 @@ void loopthread(Loop* loop)
 void serve(Loop* loop)
 {
 	TCPServer server(*loop);
-	server.start();
-	server.setReadCallback(readcallback);
-	server.setCloseCallback(closecallback);
-	server.setWriteCallback(defaultcallback);
-	server.setErrorCallback(defaultcallback);
-
-	loop->start(); 
+	server.Start();
+	std::function<void(Connection*)> funtor(Scallback);
+	server.Serve(funtor);
+	loop->Start(); 
 	Thread thread1(std::bind(loopthread, loop));
 	thread1.run(); 
 	Thread thread2(std::bind(loopthread, loop));

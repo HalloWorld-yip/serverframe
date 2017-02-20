@@ -16,7 +16,7 @@ Loop::Loop()
 
 }
 
-void Loop::start()
+void Loop::Start()
 {
 	m_running = true;
 
