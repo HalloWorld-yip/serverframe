@@ -1,0 +1,13 @@
+﻿  thread.cpp
+thread.cpp(71): warning C4101: “nfds”: 未引用的局部变量
+thread.cpp(187): warning C4800: “int”: 将值强制为布尔值“true”或“false”(性能警告)
+thread.cpp(237): warning C4244: “参数”: 从“SOCKET”转换到“int”，可能丢失数据
+thread.cpp(390): warning C4244: “参数”: 从“SOCKET”转换到“int”，可能丢失数据
+thread.cpp(407): warning C4101: “saddr”: 未引用的局部变量
+  正在生成代码
+  1 of 588 functions ( 0.2%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    21 functions had inline decision re-evaluated but remain unchanged
+  已完成代码的生成
+  Chatting.vcxproj -> D:\Projects\Chatting_v\x64\Release\Chatting_v.exe
+  Chatting.vcxproj -> D:\Projects\Chatting_v\x64\Release\Chatting_v.pdb (Full PDB)
